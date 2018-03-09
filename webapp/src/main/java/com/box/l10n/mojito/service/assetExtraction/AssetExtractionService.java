@@ -3,9 +3,9 @@ package com.box.l10n.mojito.service.assetExtraction;
 import com.box.l10n.mojito.entity.Asset;
 import com.box.l10n.mojito.entity.AssetExtraction;
 import com.box.l10n.mojito.entity.AssetTextUnit;
+import com.box.l10n.mojito.entity.PluralForm;
 import com.box.l10n.mojito.entity.PollableTask;
 import com.box.l10n.mojito.rest.asset.FilterConfigIdOverride;
-import com.box.l10n.mojito.rest.asset.SourceAsset;
 import com.box.l10n.mojito.service.asset.AssetRepository;
 import com.box.l10n.mojito.service.assetExtraction.extractor.AssetExtractor;
 import com.box.l10n.mojito.service.assetExtraction.extractor.UnsupportedAssetFilterTypeException;
@@ -18,6 +18,7 @@ import com.box.l10n.mojito.service.pollableTask.PollableFuture;
 import com.box.l10n.mojito.service.pollableTask.PollableFutureTaskResult;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
@@ -137,8 +138,31 @@ public class AssetExtractionService {
      * @param comment           Comment for the TextUnit
      * @return The created AssetTextUnit
      */
-    @Transactional
     public AssetTextUnit createAssetTextUnit(Long assetExtractionId, String name, String content, String comment) {
+        return createAssetTextUnit(assetExtractionId, name, content, comment, null, null, null);
+    }
+     
+    /**
+     * Creates a new AssetTextUnit, and associate it to the given asset extraction.
+     *
+     * @param assetExtractionId ID of the assetExtraction object the TextUnit comes from (must be valid)
+     * @param name              Name of the TextUnit
+     * @param content           Content of the TextUnit
+     * @param comment           Comment for the TextUnit
+     * @param pluralForm        optional plural form
+     * @param pluralFormOther   optional other plural form
+     * @param usages            optional usages in the code source
+     * @return The created AssetTextUnit
+     */
+    @Transactional
+    public AssetTextUnit createAssetTextUnit(
+            Long assetExtractionId, 
+            String name, 
+            String content, 
+            String comment, 
+            PluralForm pluralForm, 
+            String pluralFormOther,
+            Set<String> usages) {
 
         logger.debug("Adding AssetTextUnit for assetExtractionId: {}\nname: {}\ncontent: {}\ncomment: {}\n", assetExtractionId, name, content, comment);
 
@@ -149,6 +173,9 @@ public class AssetExtractionService {
         assetTextUnit.setComment(comment);
         assetTextUnit.setMd5(DigestUtils.md5Hex(name + content + comment));
         assetTextUnit.setContentMd5(DigestUtils.md5Hex(content));
+        assetTextUnit.setPluralForm(pluralForm);
+        assetTextUnit.setPluralFormOther(pluralFormOther);
+        assetTextUnit.setUsages(usages);
 
         assetTextUnitRepository.save(assetTextUnit);
 
