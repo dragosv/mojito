@@ -2,8 +2,11 @@ package com.box.l10n.mojito.entity;
 
 import com.box.l10n.mojito.entity.security.user.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.Set;
+import javax.persistence.CollectionTable;
 import org.springframework.data.annotation.CreatedBy;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
@@ -53,6 +56,18 @@ public class AssetTextUnit extends AuditableEntity {
     @ManyToOne
     @JoinColumn(name = BaseEntity.CreatedByUserColumnName, foreignKey = @ForeignKey(name = "FK__ASSET_TEXT_UNIT__USER__ID"))
     protected User createdByUser;
+
+    @ManyToOne
+    @JoinColumn(name = "plural_form_id", foreignKey = @ForeignKey(name = "FK__ASSET_TEXT_UNIT__PLURAL_FORM__ID"))
+    protected PluralForm pluralForm;
+
+    @Column(name = "plural_form_other", length = Integer.MAX_VALUE)
+    protected String pluralFormOther;
+
+    @ElementCollection
+    @CollectionTable(name = "asset_text_unit_usages",
+            joinColumns = @JoinColumn(name = "asset_text_unit_id"), foreignKey = @ForeignKey(name = "FK__ASSET_TEXT_UNIT_USAGES__ASSET_TEXT_UNIT__ID"))
+    private Set<String> usages;
 
     public User getCreatedByUser() {
         return createdByUser;
@@ -109,4 +124,29 @@ public class AssetTextUnit extends AuditableEntity {
     public void setAssetExtraction(AssetExtraction assetExtraction) {
         this.assetExtraction = assetExtraction;
     }
+
+    public PluralForm getPluralForm() {
+        return pluralForm;
+    }
+
+    public void setPluralForm(PluralForm pluralForm) {
+        this.pluralForm = pluralForm;
+    }
+
+    public String getPluralFormOther() {
+        return pluralFormOther;
+    }
+
+    public void setPluralFormOther(String pluralFormOther) {
+        this.pluralFormOther = pluralFormOther;
+    }
+
+    public Set<String> getUsages() {
+        return usages;
+    }
+
+    public void setUsages(Set<String> usages) {
+        this.usages = usages;
+    }
+
 }
