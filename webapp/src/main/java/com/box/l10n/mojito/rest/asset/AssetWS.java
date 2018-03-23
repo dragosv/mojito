@@ -148,7 +148,9 @@ public class AssetWS {
                 normalizedContent,
                 repositoryLocale,
                 localizedAssetBody.getOutputBcp47tag(),
-                localizedAssetBody.getFilterConfigIdOverride());
+                localizedAssetBody.getFilterConfigIdOverride(),
+                localizedAssetBody.getInheritanceMode(),
+                localizedAssetBody.getStatus());
 
         localizedAssetBody.setContent(generateLocalized);
 
