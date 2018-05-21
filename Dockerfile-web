@@ -1,4 +1,12 @@
-FROM java:8
+FROM endeveit/docker-jq AS build
+
+RUN mkdir /var/mojito
+
+WORKDIR /var/mojito
+
+RUN curl -s https://api.github.com/repos/box/mojito/releases/latest | jq -r '.assets[] | select(.name | startswith("mojito-webapp")) | .browser_download_url' | xargs curl -LO
+
+FROM openjdk:8-jre
 
 RUN apt-get update && apt-get install -y locales
 
@@ -9,7 +17,9 @@ RUN locale-gen $LANG
 
 RUN mkdir /var/mojito-webapp
 
-COPY webapp/target/mojito-webapp-*.jar /var/mojito-webapp/mojito-webapp.jar
+WORKDIR /var/mojito-webapp
+
+COPY --from=build /var/mojito/mojito-webapp*.jar mojito-webapp.jar
 
 RUN sh -c 'touch /var/mojito-webapp/mojito-webapp.jar'
 
