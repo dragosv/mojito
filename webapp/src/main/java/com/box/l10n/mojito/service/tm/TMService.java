@@ -23,6 +23,7 @@ import com.box.l10n.mojito.okapi.ImportTranslationsWithTranslationKitStep;
 import com.box.l10n.mojito.okapi.InheritanceMode;
 import com.box.l10n.mojito.okapi.PseudoLocalizeStep;
 import com.box.l10n.mojito.okapi.RawDocument;
+import com.box.l10n.mojito.okapi.Status;
 import com.box.l10n.mojito.okapi.TranslateStep;
 import com.box.l10n.mojito.okapi.XLIFFWriter;
 import com.box.l10n.mojito.okapi.qualitycheck.Parameters;
@@ -826,6 +827,8 @@ public class TMService {
      * still used to fetch the translations). This can be used to generate a
      * file with tag "fr" even if the translations are stored with fr-FR
      * repository locale.
+     * @param inheritanceMode
+     * @param status
      * @return the localized asset
      */
     public String generateLocalized(
@@ -833,7 +836,9 @@ public class TMService {
             String content,
             RepositoryLocale repositoryLocale,
             String outputBcp47tag,
-            FilterConfigIdOverride filterConfigIdOverride) {
+            FilterConfigIdOverride filterConfigIdOverride,
+            InheritanceMode inheritanceMode,
+            Status status) {
 
         String bcp47Tag;
 
@@ -846,7 +851,7 @@ public class TMService {
 
         logger.debug("Configuring pipeline for localized XLIFF generation");
 
-        BasePipelineStep translateStep = (BasePipelineStep) new TranslateStep(asset, repositoryLocale, InheritanceMode.USE_PARENT);
+        BasePipelineStep translateStep = (BasePipelineStep) new TranslateStep(asset, repositoryLocale, inheritanceMode, status);
         return generateLocalizedBase(asset, content, filterConfigIdOverride, bcp47Tag, translateStep);
     }
 
