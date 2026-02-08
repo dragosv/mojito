@@ -1,0 +1,16 @@
+{{- if .Values.mysql.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mojito.fullname" . }}-mysql-config
+  labels:
+    {{- include "mojito.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database
+data:
+  my.cnf: |
+    [mysqld]
+    character-set-server=utf8mb4
+    collation-server=utf8mb4_bin
+    max-connections=1000
+    log_error_verbosity=2
+{{- end }}

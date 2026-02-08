@@ -1,0 +1,191 @@
+# Custom values template for Mojito Helm Chart
+# Copy this file and customize for your environment
+
+# Global settings
+global:
+  environment: custom  # development, staging, production
+
+# MySQL Database Configuration
+mysql:
+  enabled: true
+  auth:
+    rootPassword: "CHANGE_THIS"
+    database: "mojito"
+    username: "mojito"
+    password: "CHANGE_THIS"
+  image:
+    repository: mysql
+    tag: "8.0.34"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "2000m"
+  persistence:
+    enabled: true
+    storageClass: ""  # e.g., "fast", "default", "aws-ebs"
+    size: 20Gi
+  service:
+    type: ClusterIP
+    port: 3306
+
+# Mojito API/WebApp
+api:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: mojito
+    tag: "bk21"  # bk8, bk11, bk16, bk17, or bk21
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: LoadBalancer  # ClusterIP, NodePort, LoadBalancer
+    port: 8080
+    targetPort: 8080
+    # Uncomment to specify LoadBalancer IP
+    # loadBalancerIP: "1.2.3.4"
+  
+  ingress:
+    enabled: true
+    className: "nginx"  # nginx, istio, etc.
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    hosts:
+      - host: mojito.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: mojito-tls
+        hosts:
+          - mojito.example.com
+  
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "1000m"
+    limits:
+      memory: "2Gi"
+      cpu: "2000m"
+  
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  
+  # Spring Boot Configuration
+  springApplication:
+    flyway:
+      enabled: "true"
+      clean: "false"
+    jpa:
+      databasePlatform: "org.hibernate.dialect.MySQLDialect"
+      hibernateDdlAuto: "none"
+      deferDatasourceInitialization: "false"
+    datasource:
+      driverClassName: "com.mysql.cj.jdbc.Driver"
+  
+  # Quartz Scheduler for distributed environments
+  quartz:
+    enabled: true
+    scheduler:
+      instanceId: "AUTO"
+      clustered: true
+      jobStoreTx: true
+      threadCount: 10
+  
+  # Health checks
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  # JVM Configuration
+  javaOpts: "-Xms512m -Xmx2g"
+  
+  # Development
+  debugMode: false
+  debugPort: 5005
+
+# CLI (optional)
+cli:
+  enabled: false
+  image:
+    repository: mojito
+    tag: "cli-bk8"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+
+# Security
+podSecurityContext:
+  fsGroup: 999
+  runAsNonRoot: true
+  runAsUser: 999
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+
+# ServiceAccount
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/actuator/prometheus"
+
+# Node affinity
+nodeSelector: {}
+  # disktype: ssd
+
+tolerations: []
+  # - key: "key1"
+  #   operator: "Equal"
+  #   value: "value1"
+  #   effect: "NoSchedule"
+
+affinity: {}
+  # nodeAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: disktype
+  #         operator: In
+  #         values:
+  #         - ssd
+
+# Labels and annotations
+commonLabels:
+  app: mojito
+  owner: team-localization
+
+commonAnnotations:
+  deployment-tool: helm

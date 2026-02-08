@@ -1,0 +1,155 @@
+# Default values for mojito
+# This is a YAML-formatted file
+
+# Global settings
+global:
+  environment: production
+
+# MySQL Database Configuration
+mysql:
+  enabled: true
+  auth:
+    rootPassword: "ChangeMe"
+    database: "mojito"
+    username: "mojito"
+    password: "ChangeMe"
+  image:
+    repository: mysql
+    tag: "8.0.34"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 10Gi
+  service:
+    type: ClusterIP
+    port: 3306
+
+# Mojito API/WebApp Configuration
+api:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: mojito
+    # Available tags: bk8, bk11, bk16, bk17, bk21
+    # bk8 = Java 8, bk11 = Java 11, bk16 = Java 16, bk17 = Java 17, bk21 = Java 21
+    tag: "bk21"
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  
+  ingress:
+    enabled: false
+    className: "nginx"
+    annotations: {}
+    hosts:
+      - host: mojito.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+  
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "2000m"
+  
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  
+  # Spring Boot configuration via environment variables
+  springApplication:
+    flyway:
+      enabled: "true"
+      clean: "false"
+    jpa:
+      databasePlatform: "org.hibernate.dialect.MySQLDialect"
+      hibernateDdlAuto: "none"
+      deferDatasourceInitialization: "false"
+    datasource:
+      driverClassName: "com.mysql.cj.jdbc.Driver"
+    # Additional Spring properties can be added here
+  
+  # Quartz Scheduler Configuration (for distributed setup)
+  quartz:
+    enabled: false
+    scheduler:
+      # Multi-quartz settings for clustered environments
+      instanceId: "AUTO"
+      clustered: false
+      jobStoreTx: true
+      threadCount: 10
+  
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  # JVM options
+  javaOpts: ""
+  
+  # Enable debug port for development
+  debugMode: false
+  debugPort: 5005
+
+# CLI Configuration (for batch jobs/tools)
+cli:
+  enabled: false
+  image:
+    repository: mojito
+    tag: "cli-bk8"
+    pullPolicy: IfNotPresent
+  
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+
+# Common configuration
+commonLabels: {}
+commonAnnotations: {}
+
+# ServiceAccount configuration
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod configuration
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+
+# Node selection
+nodeSelector: {}
+tolerations: []
+affinity: {}

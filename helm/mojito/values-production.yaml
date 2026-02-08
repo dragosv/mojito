@@ -1,0 +1,87 @@
+# Production environment values for Mojito Helm Chart
+
+global:
+  environment: production
+
+mysql:
+  enabled: true
+  auth:
+    rootPassword: "CHANGE_ME_IN_PRODUCTION"
+    database: "mojito"
+    username: "mojito"
+    password: "CHANGE_ME_IN_PRODUCTION"
+  image:
+    tag: "8.0.34"
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "2000m"
+  persistence:
+    enabled: true
+    storageClass: ""  # Specify your storage class
+    size: 50Gi
+
+api:
+  enabled: true
+  replicaCount: 2
+  image:
+    tag: "bk21"
+  service:
+    type: LoadBalancer
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    hosts:
+      - host: mojito.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: mojito-tls
+        hosts:
+          - mojito.example.com
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "1000m"
+    limits:
+      memory: "2Gi"
+      cpu: "2000m"
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  debugMode: false
+  javaOpts: "-Xms1g -Xmx2g"
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 20
+  quartz:
+    enabled: true
+    scheduler:
+      instanceId: "AUTO"
+      clustered: true
+      jobStoreTx: true
+      threadCount: 10
+
+podSecurityContext:
+  fsGroup: 999
+  runAsNonRoot: true
+  runAsUser: 999
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false

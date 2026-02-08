@@ -1,0 +1,16 @@
+apiVersion: v2
+name: mojito
+description: A Helm chart for Mojito - Box Localization Platform
+type: application
+version: 0.1.0
+appVersion: "0.111"
+keywords:
+  - localization
+  - i18n
+  - translation
+home: https://github.com/box/mojito
+sources:
+  - https://github.com/box/mojito
+maintainers:
+  - name: Mojito Team
+    email: localization@box.com
