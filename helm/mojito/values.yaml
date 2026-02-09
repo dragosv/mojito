@@ -5,7 +5,8 @@
 global:
   environment: production
 
-# MySQL Database Configuration
+# Bitnami MySQL Chart Configuration
+# See: https://github.com/bitnami/charts/tree/main/bitnami/mysql
 mysql:
   enabled: true
   auth:
@@ -13,24 +14,30 @@ mysql:
     database: "mojito"
     username: "mojito"
     password: "ChangeMe"
-  image:
-    repository: mysql
-    tag: "8.0.34"
-    pullPolicy: IfNotPresent
-  resources:
-    requests:
-      memory: "256Mi"
-      cpu: "250m"
-    limits:
-      memory: "1Gi"
-      cpu: "1000m"
-  persistence:
-    enabled: true
-    storageClass: ""
-    size: 10Gi
+  primary:
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+    persistence:
+      enabled: true
+      storageClass: ""
+      size: 10Gi
   service:
     type: ClusterIP
     port: 3306
+  metrics:
+    enabled: false
+  initdbScripts: {}
+  # Custom MySQL configuration can be passed here if needed
+  configuration: |-
+    [mysqld]
+    character-set-server=utf8mb4
+    collation-server=utf8mb4_bin
+    max_connections=1000
 
 # Mojito API/WebApp Configuration
 api:

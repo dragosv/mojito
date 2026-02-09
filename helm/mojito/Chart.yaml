@@ -14,3 +14,9 @@ sources:
 maintainers:
   - name: Mojito Team
     email: localization@box.com
+
+dependencies:
+  - name: mysql
+    version: "9.16.0"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: mysql.enabled
