@@ -1,0 +1,60 @@
+# Helm ignore file
+# Similar to .gitignore, this file contains patterns that will be ignored
+# when packaging the chart.
+
+
+# Patterns to ignore when building packages.
+# This supports shell glob matching, relative path matching, and
+# negation (prefixed with !). Only one pattern per line.
+.DS_Store
+*.pack
+*.tgz
+
+# Ignore version control
+.git/
+.git
+../.git
+.gitignore
+.gitattributes
+
+# Common backup files
+*.swp
+*.bak
+*.tmp
+*~
+
+# Various IDEs
+.project
+.idea/
+*.tmproj
+.vscode/
+*.swp
+*.swo
+*~
+
+# Ignore OS files
+.AppleDouble
+.LSOverride
+._*
+
+# Ignore documentation
+*.md
+LICENSE
+CONTRIBUTING.md
+
+# Ignore test files
+tests/
+test/
+
+# Chart dependencies (these are already embedded in the package)
+charts/*.tgz
+charts/*.pack
+Chart.lock
+
+# Ignore node modules if present
+node_modules/
+
+# Ignore common build artifacts
+dist/
+build/
+out/

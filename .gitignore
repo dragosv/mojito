@@ -9,6 +9,7 @@ application.pid
 /test-common/target/
 /common/target/
 *.iml
+*.tgz
 npm-debug.log
 /webapp/node
 /webapp/node_modules
