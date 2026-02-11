@@ -1,0 +1,14 @@
+{{- if and .Values.mysql.operator.enabled .Values.mysql.cluster.create }}
+apiVersion: mysql.oracle.com/v2
+kind: InnoDBCluster
+metadata:
+  name: {{ .Values.mysql.cluster.name }}
+  labels:
+    {{- include "mojito.labels" . | nindent 4 }}
+spec:
+  secretName: {{ .Values.mysql.cluster.secretName }}
+  instances: {{ .Values.mysql.cluster.instances }}
+  router:
+    instances: {{ .Values.mysql.cluster.routerInstances }}
+  tlsUseSelfSigned: {{ .Values.mysql.cluster.tlsUseSelfSigned }}
+{{- end }}

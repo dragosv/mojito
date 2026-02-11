@@ -1,0 +1,9 @@
+1. Verify MySQL Operator and cluster:
+   kubectl get pods -l app.kubernetes.io/name=mysql-operator
+   kubectl get innodbclusters.mysql.oracle.com
+
+2. Verify Mojito API and workers:
+   kubectl get deploy {{ include "mojito.fullname" . }}-api {{ include "mojito.fullname" . }}-worker
+
+3. Port-forward API locally:
+   kubectl port-forward svc/{{ include "mojito.fullname" . }}-api 8080:{{ .Values.api.service.port }}

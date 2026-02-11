@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mojito.fullname" . }}-api
+  labels:
+    {{- include "mojito.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels:
+      {{- include "mojito.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        {{- include "mojito.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: api
+    spec:
+      containers:
+        - name: api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.api.containerPort }}
+              protocol: TCP
+            {{- if .Values.api.debug.enabled }}
+            - name: debug
+              containerPort: {{ .Values.api.debug.containerPort }}
+              protocol: TCP
+            {{- end }}
+          env:
+            - name: JAVA_OPTS
+              value: {{ .Values.api.javaOpts | quote }}
+            - name: SPRING_APPLICATION_JSON
+              value: {{ include "mojito.springJson" (dict "root" . "component" "api") | quote }}
+          resources:
+            {{- toYaml .Values.api.resources | nindent 12 }}

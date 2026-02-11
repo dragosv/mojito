@@ -1,0 +1,12 @@
+apiVersion: v2
+name: mojito
+description: Helm chart for Mojito API and worker services with optional MySQL Operator-managed database.
+type: application
+version: 0.1.0
+appVersion: "latest"
+
+dependencies:
+  - name: mysql-operator
+    version: 2.2.7
+    repository: https://mysql.github.io/mysql-operator/
+    condition: mysql.operator.enabled

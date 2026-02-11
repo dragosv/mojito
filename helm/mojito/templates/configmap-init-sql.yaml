@@ -1,0 +1,14 @@
+{{- if and .Values.mysql.operator.enabled .Values.mysql.cluster.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mojito.fullname" . }}-mysql-init
+  labels:
+    {{- include "mojito.labels" . | nindent 4 }}
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS `{{ .Values.mysql.database.name }}`;
+    CREATE USER IF NOT EXISTS '{{ .Values.mysql.auth.appUser }}'@'%' IDENTIFIED BY '{{ .Values.mysql.auth.appPassword }}';
+    GRANT ALL PRIVILEGES ON `{{ .Values.mysql.database.name }}`.* TO '{{ .Values.mysql.auth.appUser }}'@'%';
+    FLUSH PRIVILEGES;
+{{- end }}

@@ -1,0 +1,40 @@
+{{- if and .Values.mysql.operator.enabled .Values.mysql.cluster.create }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "mojito.fullname" . }}-mysql-bootstrap
+  labels:
+    {{- include "mojito.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "mojito.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: mysql-bootstrap
+          image: mysql:8.0.34
+          imagePullPolicy: {{ .Values.mysql.cluster.imagePullPolicy }}
+          env:
+            - name: MYSQL_PWD
+              value: {{ .Values.mysql.auth.rootPassword | quote }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              until mysql -h {{ include "mojito.mysqlHost" . }} -u {{ .Values.mysql.auth.rootUser }} -e 'select 1' ; do
+                sleep 5
+              done
+              mysql -h {{ include "mojito.mysqlHost" . }} -u {{ .Values.mysql.auth.rootUser }} < /init/init.sql
+          volumeMounts:
+            - name: init-sql
+              mountPath: /init
+      volumes:
+        - name: init-sql
+          configMap:
+            name: {{ include "mojito.fullname" . }}-mysql-init
+{{- end }}

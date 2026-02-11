@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mojito.fullname" . }}-worker
+  labels:
+    {{- include "mojito.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels:
+      {{- include "mojito.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        {{- include "mojito.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker
+    spec:
+      containers:
+        - name: worker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.worker.debug.enabled }}
+          ports:
+            - name: debug
+              containerPort: {{ .Values.worker.debug.containerPort }}
+              protocol: TCP
+          {{- end }}
+          env:
+            - name: JAVA_OPTS
+              value: {{ .Values.worker.javaOpts | quote }}
+            - name: SPRING_APPLICATION_JSON
+              value: {{ include "mojito.springJson" (dict "root" . "component" "worker") | quote }}
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
